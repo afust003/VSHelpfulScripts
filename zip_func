@@ -1,0 +1,44 @@
+function Compress-FolderToZip {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$FolderPath,
+        
+        [Parameter(Mandatory=$true)]
+        [string]$ZipFileName
+    )
+
+    try {
+        # Ensure the provided folder path exists
+        if (-not (Test-Path -Path $FolderPath -PathType Container)) {
+            throw "Folder path '$FolderPath' does not exist."
+        }
+
+        # If the provided zip file name does not end with ".zip", append it
+        if (-not $ZipFileName.EndsWith(".zip")) {
+            $ZipFileName += ".zip"
+        }
+
+        # Path to 7z.exe
+        $7zipPath = "C:\Program Files\7-Zip\7z.exe"
+
+        # Check if 7z.exe exists
+        if (-not (Test-Path -Path $7zipPath -PathType Leaf)) {
+            throw "7-Zip executable not found at '$7zipPath'."
+        }
+
+        # Execute 7z.exe to compress the folder with a progress bar
+        $arguments = "a", "-tzip", "-bsp1", "$ZipFileName", "$FolderPath\*"
+        $process = Start-Process -FilePath $7zipPath -ArgumentList $arguments -PassThru -WindowStyle Hidden -Wait
+
+        # Check if the process exited with a non-zero exit code
+        if ($process.ExitCode -ne 0) {
+            throw "Error compressing folder. Exit code: $($process.ExitCode)"
+        }
+    }
+    catch {
+        throw $_
+    }
+}
+
+# Example usage:
+# Compress-FolderToZip -FolderPath "C:\path\to\folder" -ZipFileName "output.zip"
