@@ -1,0 +1,30 @@
+function Find-LargeFiles {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Directory
+    )
+
+    # Initialize a counter for large files
+    $largeFileCount = 0
+
+    try {
+        # Find files recursively up to 5 levels deep ending in .zip, .dll, or .exe and larger than 150MB
+        $largeFiles = Get-ChildItem -Path $Directory -Recurse -Depth 5 -File | Where-Object { 
+            $_.Extension -match '\.zip$|\.dll$|\.exe$' -and $_.Length -gt 150MB 
+        }
+
+        # Increment the counter for each large file found
+        $largeFileCount = $largeFiles.Count
+
+        # If at least 2 large files are found, log a warning message
+        if ($largeFileCount -ge 2) {
+            Write-Host "WARNING: Found $largeFileCount large files ending in .zip, .dll, or .exe and larger than 150MB in size."
+        }
+    }
+    catch {
+        Write-Host "Error occurred: $_"
+    }
+}
+
+# Example usage:
+# Find-LargeFiles -Directory "C:\path\to\directory"
