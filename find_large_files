@@ -19,12 +19,21 @@ function Find-LargeFiles {
         # If at least 2 large files are found, log a warning message
         if ($largeFileCount -ge 2) {
             Write-Host "WARNING: Found $largeFileCount large files ending in .zip, .dll, or .exe and larger than 150MB in size."
+             
+            # Print out the top 5 files along with their sizes
+            $top5Files = $largeFiles | Select-Object -First 5
+            $top5Files | ForEach-Object {
+                Write-Host "$($_.FullName) - Size: $($_.Length / 1MB) MB"
+            }
+
         }
     }
     catch {
         Write-Host "Error occurred: $_"
     }
 }
+
+
 
 # Example usage:
 # Find-LargeFiles -Directory "C:\path\to\directory"
